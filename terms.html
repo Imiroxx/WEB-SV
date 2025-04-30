@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Условия использования - ShadowVault</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+    <style>
+        .gradient-text {
+            background: linear-gradient(to right, #9333ea, #d8b4fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .shadow-glow {
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans antialiased">
+    <nav class="bg-gray-800 border-b border-gray-700 fixed w-full top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="ri-lock-2-line text-purple-600 text-2xl mr-2 animate-pulse"></i>
+                    <span class="text-white font-bold text-xl">ShadowVault</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://shadow-vault.ru/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Главная</a>
+                    <a href="https://shadow-vault.ru/terms" class="text-white px-3 py-2 rounded-md text-sm font-medium">Условия</a>
+                    <a href="https://shadow-vault.ru/privacy" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Конфиденциальность</a>
+                    <a href="https://shadow-vault.ru/application" class="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700">Войти в приложение</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <section class="pt-24 pb-20 bg-gray-900 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-700 to-purple-900 animate-pulse"></div>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-700 shadow-glow">
+                <h1 class="text-4xl font-bold text-white mb-6">
+                    Пользовательское <span class="gradient-text">соглашение</span>
+                </h1>
+                <p class="text-gray-400 mb-4"><strong>Лицензионное соглашение для ShadowVault</strong></p>
+                <p class="text-gray-300 mb-8">
+                    Настоящее Лицензионное соглашение ("Соглашение") регулирует использование программного обеспечения ShadowVault ("Программа") и предоставляет права на его использование. Используя Программу, вы соглашаетесь с условиями данного Соглашения.
+                </p>
+                <div class="space-y-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-file-text-line text-purple-600 mr-2"></i> 1. Предоставление лицензии
+                        </h2>
+                        <p class="text-gray-300">
+                            Разработчик предоставляет вам ограниченную, неисключительную, непередаваемую лицензию на использование Программы ShadowVault в личных или коммерческих целях при условии соблюдения всех условий данного Соглашения.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-forbid-line text-purple-600 mr-2"></i> 2. Ограничения
+                        </h2>
+                        <p class="text-gray-300 mb-4">Вы не имеете права:</p>
+                        <ul class="list-disc pl-6 text-gray-300 space-y-2">
+                            <li>Модифицировать, декомпилировать, дизассемблировать или иным образом пытаться извлечь исходный код Программы.</li>
+                            <li>Распространять, продавать, сдавать в аренду или передавать Программу третьим лицам без письменного согласия Разработчика.</li>
+                            <li>Использовать Программу для незаконных целей или в нарушение прав третьих лиц.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-alert-line text-purple-600 mr-2"></i> 3. Ответственность
+                        </h2>
+                        <p class="text-gray-300">
+                            Программа предоставляется "как есть", без каких-либо гарантий, явных или подразумеваемых. Разработчик не несет ответственности за любые убытки, возникшие в результате использования или невозможности использования Программы.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-lock-2-line text-purple-600 mr-2"></i> 4. Конфиденциальность
+                        </h2>
+                        <p class="text-gray-300">
+                            Программа может собирать и обрабатывать данные пользователя в соответствии с <a href="https://shadow-vault.ru/privacy" class="text-purple-400 hover:text-purple-600 transition">Политикой конфиденциальности</a>. Используя Программу, вы соглашаетесь с обработкой ваших данных.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-close-circle-line text-purple-600 mr-2"></i> 5. Прекращение действия лицензии
+                        </h2>
+                        <p class="text-gray-300">
+                            Разработчик оставляет за собой право прекратить действие лицензии в случае нарушения вами условий данного Соглашения. В таком случае вы обязаны прекратить использование Программы и удалить все её копии.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-edit-line text-purple-600 mr-2"></i> 6. Изменения в Соглашении
+                        </h2>
+                        <p class="text-gray-300">
+                            Разработчик оставляет за собой право вносить изменения в настоящее Соглашение. Продолжение использования Программы после внесения изменений означает ваше согласие с новыми условиями.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-copyright-line text-purple-600 mr-2"></i> 7. Авторские права
+                        </h2>
+                        <p class="text-gray-300">
+                            Программа ShadowVault защищена авторским правом и другими законами об интеллектуальной собственности. Все права на Программу принадлежат Разработчику.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-mail-line text-purple-600 mr-2"></i> 8. Контактная информация
+                        </h2>
+                        <p class="text-gray-300 mb-4">Если у вас есть вопросы по поводу данного Соглашения, вы можете связаться с Разработчиком:</p>
+                        <ul class="list-disc pl-6 text-gray-300 space-y-2">
+                            <li><strong>Электронная почта:</strong> <a href="mailto:support@shadow-vault.ru" class="text-purple-400 hover:text-purple-600 transition">support@shadow-vault.ru</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-10 text-center">
+                    <a href="https://shadow-vault.ru/" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition transform hover:scale-105 shadow-glow inline-block">
+                        Вернуться на главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
+

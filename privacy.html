@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Политика конфиденциальности - ShadowVault</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+    <style>
+        .gradient-text {
+            background: linear-gradient(to right, #9333ea, #d8b4fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .shadow-glow {
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans antialiased">
+    <nav class="bg-gray-800 border-b border-gray-700 fixed w-full top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="ri-lock-2-line text-purple-600 text-2xl mr-2 animate-pulse"></i>
+                    <span class="text-white font-bold text-xl">ShadowVault</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://shadow-vault.ru/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Главная</a>
+                    <a href="https://shadow-vault.ru/terms" class="text-white px-3 py-2 rounded-md text-sm font-medium">Условия</a>
+                    <a href="https://shadow-vault.ru/privacy" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Конфиденциальность</a>
+                    <a href="https://shadow-vault.ru/application" class="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700">Войти в приложение</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <section class="pt-24 pb-20 bg-gray-900 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-700 to-purple-900 animate-pulse"></div>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-700 shadow-glow">
+                <h1 class="text-4xl font-bold text-white mb-6">
+                    Политика <span class="gradient-text">конфиденциальности</span>
+                </h1>
+                <p class="text-gray-400 mb-4"><strong>Последнее обновление:</strong> 13.02.2025</p>
+                <p class="text-gray-300 mb-8">
+                    Ваша конфиденциальность очень важна для нас. В этой Политике конфиденциальности описывается, как ShadowVault собирает, использует, защищает и раскрывает вашу личную информацию при использовании нашего приложения и услуг.
+                </p>
+                <div class="space-y-8">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-database-2-line text-purple-600 mr-2"></i> 1. Какие данные мы собираем?
+                        </h2>
+                        <p class="text-gray-300 mb-4">Мы можем собирать следующие типы данных:</p>
+                        <ul class="list-disc pl-6 text-gray-300 space-y-2">
+                            <li><strong>Личная информация:</strong> Имя, адрес электронной почты, номер телефона и другие данные, которые вы предоставляете при регистрации или использовании наших услуг.</li>
+                            <li><strong>Данные об устройстве:</strong> Информация о вашем устройстве, включая тип устройства, операционную систему, IP-адрес и уникальные идентификаторы.</li>
+                            <li><strong>Данные об использовании:</strong> Информация о том, как вы используете наше приложение, включая историю действий, предпочтения и настройки.</li>
+                            <li><strong>Зашифрованные данные:</strong> Данные, которые вы шифруете с помощью нашего приложения, хранятся в зашифрованном виде и не доступны нам.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-shield-line text-purple-600 mr-2"></i> 2. Как мы используем ваши данные?
+                        </h2>
+                        <p class="text-gray-300 mb-4">Мы используем собранные данные для следующих целей:</p>
+                        <ul class="list-disc pl-6 text-gray-300 space-y-2">
+                            <li><strong>Предоставление услуг:</strong> Для работы приложения, включая шифрование данных, управление паролями и генерацию паролей.</li>
+                            <li><strong>Улучшение приложения:</strong> Для анализа использования приложения и улучшения его функциональности.</li>
+                            <li><strong>Обратная связь:</strong> Для связи с вами по вопросам, связанным с использованием приложения, обновлениями и технической поддержкой.</li>
+                            <li><strong>Безопасность:</strong> Для защиты ваших данных и предотвращения несанкционированного доступа.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-lock-2-line text-purple-600 mr-2"></i> 3. Как мы защищаем ваши данные?
+                        </h2>
+                        <p class="text-gray-300">
+                            Мы используем современные методы шифрования и защиты данных, чтобы обеспечить безопасность вашей информации. Все данные, которые вы шифруете с помощью ShadowVault, хранятся в зашифрованном виде и не могут быть расшифрованы без вашего ключа.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-share-line text-purple-600 mr-2"></i> 4. Раскрытие данных третьим лицам
+                        </h2>
+                        <p class="text-gray-300 mb-4">Мы не передаем ваши личные данные третьим лицам, за исключением следующих случаев:</p>
+                        <ul class="list-disc pl-6 text-gray-300 space-y-2">
+                            <li><strong>С вашего согласия:</strong> Если вы даете явное согласие на передачу данных.</li>
+                            <li><strong>По требованию закона:</strong> Если это требуется по закону или для защиты наших прав и интересов.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-user-settings-line text-purple-600 mr-2"></i> 5. Ваши права
+                        </h2>
+                        <p class="text-gray-300 mb-4">Вы имеете право:</p>
+                        <ul class="list-disc pl-6 text-gray-300 space-y-2">
+                            <li><strong>Доступ к данным:</strong> Запросить информацию о том, какие данные мы храним о вас.</li>
+                            <li><strong>Исправление данных:</strong> Запросить исправление неточной или неполной информации.</li>
+                            <li><strong>Удаление данных:</strong> Запросить удаление ваших данных, за исключением случаев, когда мы обязаны хранить их по закону.</li>
+                            <li><strong>Отзыв согласия:</strong> Отозвать свое согласие на обработку данных в любое время.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-edit-line text-purple-600 mr-2"></i> 6. Изменения в Политике конфиденциальности
+                        </h2>
+                        <p class="text-gray-300">
+                            Мы можем время от времени обновлять эту Политику конфиденциальности. Все изменения будут опубликованы на этой странице, и мы уведомим вас о значительных изменениях через приложение или по электронной почте.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                            <i class="ri-mail-line text-purple-600 mr-2"></i> 7. Связь с нами
+                        </h2>
+                        <p class="text-gray-300 mb-4">Если у вас есть вопросы или замечания по поводу нашей Политики конфиденциальности, пожалуйста, свяжитесь с нами по адресу:</p>
+                        <ul class="list-disc pl-6 text-gray-300 space-y-2">
+                            <li><strong>Электронная почта:</strong> <a href="mailto:support@shadow-vault.ru" class="text-purple-400 hover:text-purple-600 transition">support@shadow-vault.ru</a></li>
+                            <li><strong>Телеграм:</strong> <a href="https://t.me/zm1roxx" class="text-purple-400 hover:text-purple-600 transition">@zm1roxx</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-10 text-center">
+                    <a href="https://shadow-vault.ru/" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition transform hover:scale-105 shadow-glow inline-block">
+                        Вернуться на главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
