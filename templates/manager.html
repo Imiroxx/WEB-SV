@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+{% block title %}Менеджер паролей - ShadowVault{% endblock %}
+{% block extra_css %}
+<style>
+    .tab-button {
+        transition: all 0.3s ease;
+    }
+    .tab-button.active {
+        background-color: #4B5563;
+        color: white;
+    }
+    @media (max-width: 640px) {
+        .container {
+            padding: 0.5rem;
+        }
+        .grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        .p-6 {
+            padding: 1rem;
+        }
+        .py-8 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        .mb-6 {
+            margin-bottom: 1rem;
+        }
+        .text-2xl {
+            font-size: 1.25rem;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        .hover-lift:hover {
+            transform: none;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .space-x-2 > * {
+            margin-right: 0 !important;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4">
+    <h1 class="text-3xl font-bold text-white mb-6">Менеджер паролей</h1>
+    <div class="bg-gray-800 rounded-xl p-6 shadow-glow mb-8">
+        <h2 class="text-xl font-bold text-white mb-4">Добавить новую запись</h2>
+        <form id="add-password-form">
+            <div class="grid grid-cols-1 gap-4 mb-4">
+                <div>
+                    <label for="site" class="block text-gray-300 mb-2">Заметка</label>
+                    <input type="text" id="site" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" placeholder="Название сайта/сервиса" required>
+                </div>
+                <div>
+                    <label for="username" class="block text-gray-300 mb-2">Имя пользователя</label>
+                    <input type="text" id="username" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" placeholder="Логин/email" required>
+                </div>
+                <div>
+                    <label for="password" class="block text-gray-300 mb-2">Пароль</label>
+                    <div class="flex">
+                        <input type="password" id="password" class="flex-1 bg-gray-700 border border-gray-600 rounded-l-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" placeholder="Пароль" required>
+                        <button type="button" id="toggle-password" class="bg-gray-600 hover:bg-gray-700 text-white px-3 rounded-r-lg">
+                            <i class="ri-eye-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover:scale-105">
+                Добавить запись
+            </button>
+        </form>
+    </div>
+    <div class="bg-gray-800 rounded-xl p-6 shadow-glow">
+        <h2 class="text-xl font-bold text-white mb-4">Сохраненные пароли</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full table-auto">
+                <thead>
+                    <tr class="border-b border-gray-700 text-gray-400 text-left">
+                        <th class="pb-2">Заметка</th>
+                        <th class="pb-2">Имя пользователя</th>
+                        <th class="pb-2">Пароль</th>
+                        <th class="pb-2">Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="passwords-table">
+                    {% for password in passwords %}
+                    <tr class="border-b border-gray-700 hover:bg-gray-700" data-id="{{ password.id }}">
+                        <td class="py-3">{{ password.site }}</td>
+                        <td class="py-3">{{ password.username }}</td>
+                        <td class="py-3">
+                            <span class="password-field">••••••••</span>
+                            <span class="password-value hidden">{{ password.password }}</span>
+                        </td>
+                        <td class="py-3">
+                            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                                <button class="show-password-btn text-blue-400 hover:text-blue-300">
+                                    <i class="ri-eye-line"></i>
+                                </button>
+                                <button class="edit-btn text-yellow-400 hover:text-yellow-300">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button class="delete-btn text-red-400 hover:text-red-300">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if not passwords %}
+        <div class="text-center py-8 text-gray-400">
+            <i class="ri-shield-keyhole-line text-4xl mb-2"></i>
+            <p>Нет сохраненных паролей</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-bold text-white mb-4">Редактировать запись</h3>
+        <form id="edit-form">
+            <input type="hidden" id="edit-id">
+            <div class="mb-4">
+                <label for="edit-site" class="block text-gray-300 mb-2">Заметка</label>
+                <input type="text" id="edit-site" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" required>
+            </div>
+            <div class="mb-4">
+                <label for="edit-username" class="block text-gray-300 mb-2">Имя пользователя</label>
+                <input type="text" id="edit-username" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" required>
+            </div>
+            <div class="mb-6">
+                <label for="edit-password" class="block text-gray-300 mb-2">Пароль</label>
+                <input type="text" id="edit-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" required>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+                <button type="button" id="cancel-edit" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    Отмена
+                </button>
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition transform hover:scale-105">
+                    Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password');
+    togglePasswordBtn.addEventListener('click', () => {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            togglePasswordBtn.innerHTML = '<i class="ri-eye-off-line"></i>';
+        } else {
+            passwordInput.type = 'password';
+            togglePasswordBtn.innerHTML = '<i class="ri-eye-line"></i>';
+        }
+    });
+    const addForm = document.getElementById('add-password-form');
+    addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const site = document.getElementById('site').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        try {
+            const response = await fetch('/api/add_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    site: site,
+                    username: username,
+                    password: password
+                })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            alert('Ошибка при добавлении пароля');
+            console.error(error);
+        }
+    });
+    document.querySelectorAll('.show-password-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('tr');
+            const passwordField = row.querySelector('.password-field');
+            const passwordValue = row.querySelector('.password-value');
+            const icon = this.querySelector('i');
+            if (passwordField.classList.contains('hidden')) {
+                passwordField.classList.remove('hidden');
+                passwordValue.classList.add('hidden');
+                icon.className = 'ri-eye-line';
+            } else {
+                passwordField.classList.add('hidden');
+                passwordValue.classList.remove('hidden');
+                icon.className = 'ri-eye-off-line';
+            }
+        });
+    });
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-form');
+    const cancelEditBtn = document.getElementById('cancel-edit');
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const row = e.target.closest('tr');
+            const id = row.dataset.id;
+            const site = row.cells[0].textContent;
+            const username = row.cells[1].textContent;
+            const password = row.querySelector('.password-value').textContent;
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-site').value = site;
+            document.getElementById('edit-username').value = username;
+            document.getElementById('edit-password').value = password;
+            editModal.classList.remove('hidden');
+        });
+    });
+    cancelEditBtn.addEventListener('click', () => {
+        editModal.classList.add('hidden');
+    });
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-id').value;
+        const site = document.getElementById('edit-site').value;
+        const username = document.getElementById('edit-username').value;
+        const password = document.getElementById('edit-password').value;
+        try {
+            const response = await fetch('/api/update_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id,
+                    site: site,
+                    username: username,
+                    password: password
+                })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            alert('Ошибка при обновлении пароля');
+            console.error(error);
+        }
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            if (!confirm('Вы уверены, что хотите удалить эту запись?')) {
+                return;
+            }
+            const row = e.target.closest('tr');
+            const id = row.dataset.id;
+            try {
+                const response = await fetch('/api/delete_password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: id
+                    })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    row.remove();
+                    if (document.querySelectorAll('#passwords-table tr').length === 0) {
+                        window.location.reload();
+                    }
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                alert('Ошибка при удалении пароля');
+                console.error(error);
+            }
+        });
+    });
+</script>
+{% endblock %}

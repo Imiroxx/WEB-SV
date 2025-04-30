@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ShadowVault - {% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+    <style>
+        .gradient-text {
+            background: linear-gradient(to right, #9333ea, #d8b4fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+        .sidebar-visible {
+            transform: translateX(0);
+        }
+        .content-expanded {
+            margin-left: 0;
+        }
+        .content-collapsed {
+            margin-left: 250px;
+        }
+        .shadow-glow {
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .content-collapsed {
+                margin-left: 0;
+            }
+            .sidebar {
+                width: 100%;
+                max-width: 280px;
+            }
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+            }
+            .mobile-overlay.visible {
+                display: block;
+            }
+            body {
+                font-size: 0.875rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            h2 {
+                font-size: 1.125rem;
+            }
+            .p-6 {
+                padding: 1rem;
+            }
+            .p-4 {
+                padding: 0.75rem;
+            }
+        }
+        @media (max-width: 640px) {
+            .container {
+                padding: 0.5rem;
+            }
+            .sidebar {
+                max-width: 100%;
+            }
+            .text-xl {
+                font-size: 1rem;
+            }
+            .text-2xl {
+                font-size: 1.25rem;
+            }
+            nav a {
+                font-size: 0.875rem;
+                padding: 0.5rem;
+            }
+            .ri-2x {
+                font-size: 1.25rem;
+            }
+            button {
+                padding: 0.5rem;
+            }
+            /* Fix header layout on mobile */
+            header .flex {
+                padding: 0.5rem;
+                justify-content: space-between;
+            }
+            header .space-x-4 > * {
+                margin-right: 0.5rem;
+            }
+            header .text-gray-300 {
+                max-width: 150px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            #sidebar-toggle {
+                min-width: 2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 0.5rem;
+            }
+            /* Ensure the header has proper spacing */
+            header {
+                height: auto;
+                min-height: 3.5rem;
+            }
+            /* Ensure the main content has proper padding */
+            main {
+                padding-top: 4rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans antialiased">
+    <div class="flex h-screen overflow-hidden">
+        <div id="mobile-overlay" class="mobile-overlay"></div>
+        <div id="sidebar" class="sidebar w-64 bg-gray-800 border-r border-gray-700 fixed h-full z-50 sidebar-visible">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center">
+                        <i class="ri-lock-2-line text-purple-600 text-2xl mr-2"></i>
+                        <span class="text-white font-bold text-xl">ShadowVault</span>
+                    </div>
+                    <button id="mobile-close" class="text-gray-400 hover:text-white focus:outline-none md:hidden">
+                        <i class="ri-close-line text-2xl"></i>
+                    </button>
+                </div>
+                <nav class="space-y-2">
+                    <a href="{{ url_for('app_dashboard') }}" class="flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition">
+                        <i class="ri-dashboard-line mr-3"></i>
+                        <span>Главная</span>
+                    </a>
+                    <a href="{{ url_for('encryptor') }}" class="flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition">
+                        <i class="ri-file-lock-line mr-3"></i>
+                        <span>Шифратор</span>
+                    </a>
+                    <a href="{{ url_for('generator') }}" class="flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition">
+                        <i class="ri-key-2-line mr-3"></i>
+                        <span>Генератор паролей</span>
+                    </a>
+                    <a href="{{ url_for('manager') }}" class="flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition">
+                        <i class="ri-shield-keyhole-line mr-3"></i>
+                        <span>Менеджер паролей</span>
+                    </a>
+                    <a href="{{ url_for('cloud') }}" class="flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition">
+                        <i class="ri-cloud-line mr-3"></i>
+                        <span>Облако</span>
+                    </a>
+                    <a href="{{ url_for('settings') }}" class="flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition">
+                        <i class="ri-settings-3-line mr-3"></i>
+                        <span>Настройки</span>
+                    </a>
+                </nav>
+                <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+                    <div class="text-center text-gray-400 text-sm mb-2">
+                        © ShadowVault 2025
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <a href="https://shadow-vault.ru" class="text-gray-400 hover:text-purple-400 transition">
+                            <i class="ri-global-line"></i>
+                        </a>
+                        <a href="https://t.me/shadowvauIt" class="text-gray-400 hover:text-purple-400 transition">
+                            <i class="ri-telegram-fill"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="main-content" class="flex-1 overflow-auto content-collapsed">
+            <header class="bg-gray-800 border-b border-gray-700 fixed w-full z-40">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center">
+                        <button id="sidebar-toggle" class="text-gray-400 hover:text-white focus:outline-none">
+                            <i class="ri-menu-line text-2xl"></i>
+                        </button>
+                        <span class="text-gray-300 ml-2 hidden sm:inline">{{ session.get('username', 'Пользователь') }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <a href="{{ url_for('logout') }}" class="text-gray-400 hover:text-purple-400 transition">
+                            <i class="ri-logout-box-r-line text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
+            <main class="pt-16 pb-4 px-4">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-900 text-red-100{% else %}bg-green-900 text-green-100{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const mobileClose = document.getElementById('mobile-close');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        let sidebarVisible = true;
+        function toggleSidebar(show) {
+            sidebarVisible = show;
+            if (show) {
+                sidebar.classList.remove('sidebar-hidden');
+                sidebar.classList.add('sidebar-visible');
+                mainContent.classList.remove('content-expanded');
+                mainContent.classList.add('content-collapsed');
+                mobileOverlay.classList.add('visible');
+            } else {
+                sidebar.classList.remove('sidebar-visible');
+                sidebar.classList.add('sidebar-hidden');
+                mainContent.classList.remove('content-collapsed');
+                mainContent.classList.add('content-expanded');
+                mobileOverlay.classList.remove('visible');
+            }
+        }
+        sidebarToggle.addEventListener('click', () => toggleSidebar(!sidebarVisible));
+        mobileClose.addEventListener('click', () => toggleSidebar(false));
+        mobileOverlay.addEventListener('click', () => toggleSidebar(false));
+        function handleResize() {
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('sidebar-visible');
+                sidebar.classList.add('sidebar-hidden');
+                mainContent.classList.remove('content-collapsed');
+                mainContent.classList.add('content-expanded');
+                sidebarVisible = false;
+                mobileOverlay.classList.remove('visible');
+            } else {
+                sidebar.classList.remove('sidebar-hidden');
+                sidebar.classList.add('sidebar-visible');
+                mainContent.classList.remove('content-expanded');
+                mainContent.classList.add('content-collapsed');
+                sidebarVisible = true;
+                mobileOverlay.classList.remove('visible');
+            }
+        }
+        window.addEventListener('resize', handleResize);
+        handleResize();
+    </script>
+    {% block extra_js %}{% endblock %}
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF cv$params={r:'930d0cbc5d02adb9',t:'MTc0NDczNjk1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CFcv$params={r:'9323f817ef24adcf',t:'MTc0NDk3NzI4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

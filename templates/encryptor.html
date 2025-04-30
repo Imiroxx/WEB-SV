@@ -1,0 +1,533 @@
+{% extends "base.html" %}
+{% block title %}Шифратор - ShadowVault{% endblock %}
+{% block extra_css %}
+<style>
+    .tab-button {
+        transition: all 0.3s ease;
+    }
+    .tab-button.active {
+        background-color: #4B5563;
+        color: white;
+    }
+    .file-input-label {
+        transition: all 0.3s ease;
+    }
+    .file-input-label:hover {
+        background-color: #374151;
+    }
+    @media (max-width: 640px) {
+        .max-w-4xl {
+            max-width: 100%;
+            padding: 0.5rem;
+        }
+        .text-3xl {
+            font-size: 1.5rem;
+        }
+        .p-6 {
+            padding: 1rem;
+        }
+        .mb-6 {
+            margin-bottom: 1rem;
+        }
+        .grid-cols-1 {
+            grid-template-columns: 1fr;
+        }
+        input, select, textarea, button {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+        }
+        .flex-wrap {
+            flex-direction: column;
+        }
+        .flex-wrap > * {
+            width: 100%;
+            margin-bottom: 0.75rem;
+        }
+        .tab-button {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+        }
+        textarea {
+            height: 80px;
+        }
+        .hover-lift:hover {
+            transform: none;
+        }
+        .file-input-label {
+            padding: 1rem;
+            font-size: 0.875rem;
+        }
+        .ri-upload-cloud-2-line {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4">
+    <h1 class="text-3xl font-bold text-white mb-6">Шифратор</h1>
+    <div class="bg-gray-800 rounded-xl p-6 shadow-glow mb-6">
+        <div class="flex border-b border-gray-700 mb-6">
+            <button id="file-tab" class="tab-button px-4 py-2 rounded-t-lg active">Файлы</button>
+            <button id="text-tab" class="tab-button px-4 py-2 rounded-t-lg">Текст</button>
+        </div>
+        <div id="file-section">
+            <div class="mb-6">
+                <label for="file-input" id="file-input-label" class="file-input-label flex items-center justify-center p-4 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-purple-500">
+                    <i class="ri-upload-cloud-2-line text-2xl mr-2"></i>
+                    <span id="file-name">Выберите файл или перетащите его сюда</span>
+                </label>
+                <input type="file" id="file-input" class="hidden">
+                <p id="file-size" class="text-gray-400 text-sm mt-2"></p>
+                <p class="text-gray-400 text-sm mt-1">Максимальный размер файла: 20 МБ</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="algorithm" class="block text-gray-300 mb-2">Алгоритм шифрования</label>
+                    <select id="algorithm" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none">
+                        <option value="AES-CBC">AES-CBC</option>
+                        <option value="TripleDES">TripleDES</option>
+                        <option value="Blowfish">Blowfish</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="key-length" class="block text-gray-300 mb-2">Длина ключа (бит)</label>
+                    <select id="key-length" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none">
+                        <option value="128">128</option>
+                        <option value="192">192</option>
+                        <option value="256">256</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-gray-300 mb-2">Пароль</label>
+                <input type="password" id="password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" placeholder="Введите пароль">
+            </div>
+            <div class="flex flex-wrap gap-4 mb-6">
+                <button id="encrypt-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover-lift">
+                    <i class="ri-lock-line mr-2"></i> Зашифровать
+                </button>
+                <button id="decrypt-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover-lift">
+                    <i class="ri-lock-unlock-line mr-2"></i> Расшифровать
+                </button>
+                <button id="download-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover-lift hidden">
+                    <i class="ri-download-line mr-2"></i> Скачать файл
+                </button>
+            </div>
+            <div class="flex items-center mb-6">
+                <input type="checkbox" id="save-to-cloud" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500">
+                <label for="save-to-cloud" class="ml-2 text-gray-300">Сохранить зашифрованный файл в облако</label>
+            </div>
+            <div id="status-message" class="hidden p-4 rounded-lg mb-4"></div>
+            <div id="progress-container" class="hidden mb-4">
+                <div class="flex justify-between mb-1">
+                    <span id="progress-status" class="text-sm font-medium text-gray-300">Обработка файла...</span>
+                    <span id="progress-percentage" class="text-sm font-medium text-gray-300">0%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-purple-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        <div id="text-section" class="hidden">
+            <div class="mb-6">
+                <label for="input-text" class="block text-gray-300 mb-2">Исходный текст</label>
+                <textarea id="input-text" rows="5" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" placeholder="Введите текст для шифрования/расшифровки"></textarea>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="text-algorithm" class="block text-gray-300 mb-2">Алгоритм шифрования</label>
+                    <select id="text-algorithm" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none">
+                        <option value="AES-CBC">AES-CBC</option>
+                        <option value="TripleDES">TripleDES</option>
+                        <option value="Blowfish">Blowfish</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="text-key-length" class="block text-gray-300 mb-2">Длина ключа (бит)</label>
+                    <select id="text-key-length" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none">
+                        <option value="128">128</option>
+                        <option value="192">192</option>
+                        <option value="256">256</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label for="text-password" class="block text-gray-300 mb-2">Пароль</label>
+                <input type="password" id="text-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" placeholder="Введите пароль">
+            </div>
+            <div class="flex flex-wrap gap-4 mb-6">
+                <button id="text-encrypt-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover-lift">
+                    <i class="ri-lock-line mr-2"></i> Зашифровать
+                </button>
+                <button id="text-decrypt-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover-lift">
+                    <i class="ri-lock-unlock-line mr-2"></i> Расшифровать
+                </button>
+            </div>
+            <div class="mb-6">
+                <label for="output-text" class="block text-gray-300 mb-2">Результат</label>
+                <textarea id="output-text" rows="5" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" placeholder="Тут будет результат шифрования/расшифровки" readonly></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button id="copy-text-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                    <i class="ri-file-copy-line mr-2"></i> Копировать
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const fileTab = document.getElementById('file-tab');
+    const textTab = document.getElementById('text-tab');
+    const fileSection = document.getElementById('file-section');
+    const textSection = document.getElementById('text-section');
+    fileTab.addEventListener('click', () => {
+        fileTab.classList.add('active');
+        textTab.classList.remove('active');
+        fileSection.classList.remove('hidden');
+        textSection.classList.add('hidden');
+    });
+    textTab.addEventListener('click', () => {
+        textTab.classList.add('active');
+        fileTab.classList.remove('active');
+        textSection.classList.remove('hidden');
+        fileSection.classList.add('hidden');
+    });
+    const fileInput = document.getElementById('file-input');
+    const fileInputLabel = document.getElementById('file-input-label');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const encryptBtn = document.getElementById('encrypt-btn');
+    const decryptBtn = document.getElementById('decrypt-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const statusMessage = document.getElementById('status-message');
+    let currentDownloadUrl = null;
+    const MAX_FILE_SIZE = 20 * 1024 * 1024;
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    function showStatus(message, isError = false) {
+        statusMessage.textContent = message;
+        statusMessage.className = `p-4 rounded-lg mb-4 ${isError ? 'text-red-500' : 'text-green-500'}`;
+        statusMessage.classList.remove('hidden');
+    }
+    function updateProgress(percentage, status) {
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressStatus = document.getElementById('progress-status');
+        const progressPercentage = document.getElementById('progress-percentage');
+        progressContainer.classList.remove('hidden');
+        progressBar.style.width = `${percentage}%`;
+        progressPercentage.textContent = `${percentage}%`;
+        progressStatus.textContent = status;
+        if (percentage >= 100) {
+            setTimeout(() => {
+                progressContainer.classList.add('hidden');
+            }, 1000);
+        }
+    }
+    function checkTaskStatus(taskId) {
+        fetch(`/api/task_status/${taskId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showStatus(data.error, true);
+                    downloadBtn.classList.add('hidden');
+                    updateProgress(0, 'Ошибка');
+                    return;
+                }
+                if (data.state === 'PENDING') {
+                    showStatus('Файл загружен, ожидание обработки...');
+                    updateProgress(30, 'Файл загружен, ожидание обработки...');
+                    setTimeout(() => checkTaskStatus(taskId), 1000);
+                } else if (data.state === 'FAILURE') {
+                    showStatus(data.status || 'Ошибка при обработке файла', true);
+                    downloadBtn.classList.add('hidden');
+                    updateProgress(0, 'Ошибка');
+                } else if (data.state === 'SUCCESS') {
+                    updateProgress(100, 'Обработка завершена');
+                    showStatus('Файл успешно обработан! Нажмите кнопку "Скачать файл" для загрузки.');
+                    if (data.filename) {
+                        currentDownloadUrl = `/download/${data.filename}`;
+                        downloadBtn.classList.remove('hidden');
+                    } else {
+                        showStatus('Ошибка: имя файла не получено', true);
+                        downloadBtn.classList.add('hidden');
+                    }
+                } else {
+                    showStatus('Неизвестный статус задачи', true);
+                    downloadBtn.classList.add('hidden');
+                    updateProgress(0, 'Ошибка');
+                }
+            })
+            .catch(error => {
+                showStatus('Ошибка при проверке статуса задачи', true);
+                console.error('Error:', error);
+                downloadBtn.classList.add('hidden');
+                updateProgress(0, 'Ошибка');
+            });
+    }
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            if (file.size > MAX_FILE_SIZE) {
+                showStatus(`Файл слишком большой. Максимальный размер: ${formatFileSize(MAX_FILE_SIZE)}`, true);
+                fileInput.value = '';
+                fileName.textContent = 'Выберите файл или перетащите его сюда';
+                fileSize.textContent = '';
+                return;
+            }
+            fileName.textContent = file.name;
+            fileSize.textContent = `Размер: ${formatFileSize(file.size)}`;
+        } else {
+            fileName.textContent = 'Выберите файл или перетащите его сюда';
+            fileSize.textContent = '';
+        }
+    });
+    fileInputLabel.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileInputLabel.classList.add('border-purple-500');
+    });
+    fileInputLabel.addEventListener('dragleave', () => {
+        fileInputLabel.classList.remove('border-purple-500');
+    });
+    fileInputLabel.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileInputLabel.classList.remove('border-purple-500');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            if (file.size > MAX_FILE_SIZE) {
+                showStatus(`Файл слишком большой. Максимальный размер: ${formatFileSize(MAX_FILE_SIZE)}`, true);
+                return;
+            }
+            fileInput.files = e.dataTransfer.files;
+            fileName.textContent = file.name;
+            fileSize.textContent = `Размер: ${formatFileSize(file.size)}`;
+        }
+    });
+    encryptBtn.addEventListener('click', async () => {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showStatus('Выберите файл для шифрования', true);
+            return;
+        }
+        const file = fileInput.files[0];
+        if (file.size > MAX_FILE_SIZE) {
+            showStatus(`Файл слишком большой. Максимальный размер: ${formatFileSize(MAX_FILE_SIZE)}`, true);
+            return;
+        }
+        const password = document.getElementById('password').value;
+        if (!password) {
+            showStatus('Введите пароль', true);
+            return;
+        }
+        const algorithm = document.getElementById('algorithm').value;
+        const keyLength = document.getElementById('key-length').value;
+        const saveToCloud = document.getElementById('save-to-cloud').checked;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('password', password);
+        formData.append('algorithm', algorithm);
+        formData.append('key_length', keyLength);
+        formData.append('save_to_cloud', saveToCloud);
+        try {
+            showStatus('Загрузка файла...');
+            updateProgress(10, 'Загрузка файла...');
+            const response = await fetch('/api/encrypt_file', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok && result.task_id) {
+                showStatus('Начато шифрование файла...');
+                updateProgress(20, 'Начало шифрования...');
+                checkTaskStatus(result.task_id);
+                fileInput.value = '';
+                fileName.textContent = 'Выберите файл или перетащите его сюда';
+                fileSize.textContent = '';
+            } else {
+                showStatus(result.error || 'Ошибка при шифровании файла', true);
+                currentDownloadUrl = null;
+                downloadBtn.classList.add('hidden');
+                updateProgress(0, 'Ошибка');
+            }
+        } catch (error) {
+            showStatus('Ошибка при шифровании файла', true);
+            console.error(error);
+            currentDownloadUrl = null;
+            downloadBtn.classList.add('hidden');
+            updateProgress(0, 'Ошибка');
+        }
+    });
+    decryptBtn.addEventListener('click', async () => {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showStatus('Выберите файл для расшифровки', true);
+            return;
+        }
+        const file = fileInput.files[0];
+        if (file.size > MAX_FILE_SIZE) {
+            showStatus(`Файл слишком большой. Максимальный размер: ${formatFileSize(MAX_FILE_SIZE)}`, true);
+            return;
+        }
+        const password = document.getElementById('password').value;
+        if (!password) {
+            showStatus('Введите пароль', true);
+            return;
+        }
+        const algorithm = document.getElementById('algorithm').value;
+        const keyLength = document.getElementById('key-length').value;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('password', password);
+        formData.append('algorithm', algorithm);
+        formData.append('key_length', keyLength);
+        try {
+            showStatus('Загрузка файла...');
+            updateProgress(10, 'Загрузка файла...');
+            const response = await fetch('/api/decrypt_file', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (response.ok && result.task_id) {
+                showStatus('Начато расшифрование файла...');
+                updateProgress(20, 'Начало расшифрования...');
+                checkTaskStatus(result.task_id);
+                fileInput.value = '';
+                fileName.textContent = 'Выберите файл или перетащите его сюда';
+                fileSize.textContent = '';
+            } else {
+                showStatus(result.error || 'Ошибка при расшифровке файла', true);
+                currentDownloadUrl = null;
+                downloadBtn.classList.add('hidden');
+                updateProgress(0, 'Ошибка');
+            }
+        } catch (error) {
+            showStatus('Ошибка при расшифровке файла', true);
+            console.error(error);
+            currentDownloadUrl = null;
+            downloadBtn.classList.add('hidden');
+            updateProgress(0, 'Ошибка');
+        }
+    });
+    downloadBtn.addEventListener('click', () => {
+        if (currentDownloadUrl) {
+            window.location.href = currentDownloadUrl;
+        }
+    });
+    const textEncryptBtn = document.getElementById('text-encrypt-btn');
+    const textDecryptBtn = document.getElementById('text-decrypt-btn');
+    const copyTextBtn = document.getElementById('copy-text-btn');
+    const inputText = document.getElementById('input-text');
+    const outputText = document.getElementById('output-text');
+    textEncryptBtn.addEventListener('click', async () => {
+        const text = inputText.value;
+        if (!text) {
+            alert('Введите текст для шифрования');
+            return;
+        }
+        const password = document.getElementById('text-password').value;
+        if (!password) {
+            alert('Введите пароль');
+            return;
+        }
+        const algorithm = document.getElementById('text-algorithm').value;
+        const keyLength = document.getElementById('text-key-length').value;
+        
+        // Debug logging
+        console.log('Sending data:', {
+            text: text,
+            password: password,
+            algorithm: algorithm,
+            key_length: parseInt(keyLength)
+        });
+        
+        try {
+            const response = await fetch('/api/encrypt_text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    password: password,
+                    algorithm: algorithm,
+                    key_length: parseInt(keyLength)
+                })
+            });
+            const result = await response.json();
+            console.log('Server response:', result); // Debug logging
+            if (response.ok) {
+                outputText.value = result.encrypted_text;
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            console.error('Error details:', error); // Debug logging
+            alert('Ошибка при шифровании текста');
+        }
+    });
+    textDecryptBtn.addEventListener('click', async () => {
+        const text = inputText.value;
+        if (!text) {
+            alert('Введите текст для расшифровки');
+            return;
+        }
+        const password = document.getElementById('text-password').value;
+        if (!password) {
+            alert('Введите пароль');
+            return;
+        }
+        const algorithm = document.getElementById('text-algorithm').value;
+        const keyLength = document.getElementById('text-key-length').value;
+        
+        // Debug logging
+        console.log('Sending decryption data:', {
+            encrypted_text: text,
+            password: password,
+            algorithm: algorithm,
+            key_length: parseInt(keyLength)
+        });
+        
+        try {
+            const response = await fetch('/api/decrypt_text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    encrypted_text: text,
+                    password: password,
+                    algorithm: algorithm,
+                    key_length: parseInt(keyLength)
+                })
+            });
+            const result = await response.json();
+            console.log('Decryption response:', result);
+            if (response.ok) {
+                outputText.value = result.decrypted_text;
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            console.error('Decryption error:', error);
+            alert('Ошибка при расшифровке текста');
+        }
+    });
+    copyTextBtn.addEventListener('click', () => {
+        if (outputText.value) {
+            outputText.select();
+            document.execCommand('copy');
+            alert('Текст скопирован в буфер обмена');
+        }
+    });
+</script>
+{% endblock %}

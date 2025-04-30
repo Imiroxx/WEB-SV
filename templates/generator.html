@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}Генератор паролей - ShadowVault{% endblock %}
+{% block extra_css %}
+<style>
+    .tab-button {
+        transition: all 0.3s ease;
+    }
+    .tab-button.active {
+        background-color: #4B5563;
+        color: white;
+    }
+    @media (max-width: 640px) {
+        .container {
+            padding: 0.5rem;
+        }
+        .grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        .p-6 {
+            padding: 1rem;
+        }
+        .py-8 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        .mb-6 {
+            margin-bottom: 1rem;
+        }
+        .text-2xl {
+            font-size: 1.25rem;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        .hover-lift:hover {
+            transform: none;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .space-x-2 > * {
+            margin-right: 0 !important;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4">
+    <h1 class="text-3xl font-bold text-white mb-6">Генератор паролей</h1>
+    <div class="bg-gray-800 rounded-xl p-6 shadow-glow mb-8">
+        <div class="mb-6">
+            <label for="length" class="block text-gray-300 mb-2">Длина пароля (8-128)</label>
+            <input type="range" id="length" min="8" max="128" value="16" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer mb-2">
+            <div class="flex justify-between">
+                <span class="text-gray-400">8</span>
+                <span id="length-value" class="text-purple-400 font-bold">16</span>
+                <span class="text-gray-400">128</span>
+            </div>
+        </div>
+        <div class="space-y-4 mb-6">
+            <div class="flex items-center">
+                <input type="checkbox" id="include-uppercase" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500" checked>
+                <label for="include-uppercase" class="ml-2 text-gray-300">Включить прописные буквы (A-Z)</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="include-lowercase" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500" checked>
+                <label for="include-lowercase" class="ml-2 text-gray-300">Включить строчные буквы (a-z)</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="include-digits" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500" checked>
+                <label for="include-digits" class="ml-2 text-gray-300">Включить цифры (0-9)</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="include-symbols" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500" checked>
+                <label for="include-symbols" class="ml-2 text-gray-300">Включить символы (!@#$%^&*)</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="exclude-similar" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500">
+                <label for="exclude-similar" class="ml-2 text-gray-300">Исключить похожие символы (1, l, I, 0, O)</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="use-passphrase" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500">
+                <label for="use-passphrase" class="ml-2 text-gray-300">Использовать пароль из слов (Passphrase)</label>
+            </div>
+        </div>
+        <button id="generate-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition transform hover:scale-105 mb-6">
+            Сгенерировать пароль
+        </button>
+        <div class="mb-6">
+            <label for="password-result" class="block text-gray-300 mb-2">Результат</label>
+            <div class="flex">
+                <input type="text" id="password-result" class="flex-1 bg-gray-700 border border-gray-600 rounded-l-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none" readonly>
+                <button id="copy-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-4 rounded-r-lg">
+                    <i class="ri-file-copy-line"></i>
+                </button>
+            </div>
+        </div>
+        <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+            <span class="text-gray-300">Сложность пароля:</span>
+            <span id="strength-indicator" class="font-bold">-</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const lengthSlider = document.getElementById('length');
+    const lengthValue = document.getElementById('length-value');
+    lengthSlider.addEventListener('input', () => {
+        lengthValue.textContent = lengthSlider.value;
+    });
+    const generateBtn = document.getElementById('generate-btn');
+    const passwordResult = document.getElementById('password-result');
+    const copyBtn = document.getElementById('copy-btn');
+    const strengthIndicator = document.getElementById('strength-indicator');
+    generateBtn.addEventListener('click', async () => {
+        const length = lengthSlider.value;
+        const includeUppercase = document.getElementById('include-uppercase').checked;
+        const includeLowercase = document.getElementById('include-lowercase').checked;
+        const includeDigits = document.getElementById('include-digits').checked;
+        const includeSymbols = document.getElementById('include-symbols').checked;
+        const excludeSimilar = document.getElementById('exclude-similar').checked;
+        const usePassphrase = document.getElementById('use-passphrase').checked;
+        try {
+            const response = await fetch('/api/generate_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    length: length,
+                    include_uppercase: includeUppercase,
+                    include_lowercase: includeLowercase,
+                    include_digits: includeDigits,
+                    include_symbols: includeSymbols,
+                    exclude_similar: excludeSimilar,
+                    use_passphrase: usePassphrase
+                })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                passwordResult.value = result.password;
+                updatePasswordStrength(result.password);
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            alert('Ошибка при генерации пароля');
+            console.error(error);
+        }
+    });
+    copyBtn.addEventListener('click', () => {
+        if (passwordResult.value) {
+            passwordResult.select();
+            document.execCommand('copy');
+            alert('Пароль скопирован в буфер обмена');
+        }
+    });
+    function updatePasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 12) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        if (strength >= 4) {
+            strengthIndicator.textContent = 'Сильный';
+            strengthIndicator.className = 'font-bold text-green-500';
+        } else if (strength >= 2) {
+            strengthIndicator.textContent = 'Средний';
+            strengthIndicator.className = 'font-bold text-yellow-500';
+        } else {
+            strengthIndicator.textContent = 'Слабый';
+            strengthIndicator.className = 'font-bold text-red-500';
+        }
+    }
+</script>
+{% endblock %}

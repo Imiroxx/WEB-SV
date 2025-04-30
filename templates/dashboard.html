@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Главная - ShadowVault{% endblock %}
+{% block extra_css %}
+<style>
+    .tab-button {
+        transition: all 0.3s ease;
+    }
+    .tab-button.active {
+        background-color: #4B5563;
+        color: white;
+    }
+    @media (max-width: 640px) {
+        .container {
+            padding: 0.5rem;
+        }
+        .grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        .p-6 {
+            padding: 1rem;
+        }
+        .py-8 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        .mb-6 {
+            margin-bottom: 1rem;
+        }
+        .text-2xl {
+            font-size: 1.25rem;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        .hover-lift:hover {
+            transform: none;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .space-x-2 > * {
+            margin-right: 0 !important;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4">
+    <h1 class="text-3xl font-bold text-white mb-8">Добро пожаловать!</h1>
+    <div class="grid grid-cols-1 gap-6 mb-8">
+        <div class="bg-gray-800 rounded-xl p-6 shadow-glow">
+            <div class="flex items-center mb-4">
+                <div class="bg-purple-600 rounded-lg p-3 mr-4">
+                    <i class="ri-file-lock-line text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">Шифратор</h2>
+            </div>
+            <p class="text-gray-400 mb-4">Шифруйте и расшифровывайте файлы и текст с помощью современных алгоритмов</p>
+            <a href="{{ url_for('encryptor') }}" class="text-purple-400 hover:text-purple-300 transition flex items-center">
+                Перейти <i class="ri-arrow-right-line ml-2"></i>
+            </a>
+        </div>
+        <div class="bg-gray-800 rounded-xl p-6 shadow-glow">
+            <div class="flex items-center mb-4">
+                <div class="bg-blue-600 rounded-lg p-3 mr-4">
+                    <i class="ri-key-2-line text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">Генератор паролей</h2>
+            </div>
+            <p class="text-gray-400 mb-4">Создавайте надежные пароли с настраиваемыми параметрами</p>
+            <a href="{{ url_for('generator') }}" class="text-blue-400 hover:text-blue-300 transition flex items-center">
+                Перейти <i class="ri-arrow-right-line ml-2"></i>
+            </a>
+        </div>
+        <div class="bg-gray-800 rounded-xl p-6 shadow-glow">
+            <div class="flex items-center mb-4">
+                <div class="bg-green-600 rounded-lg p-3 mr-4">
+                    <i class="ri-shield-keyhole-line text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">Менеджер паролей</h2>
+            </div>
+            <p class="text-gray-400 mb-4">Храните все свои пароли в одном безопасном месте</p>
+            <a href="{{ url_for('manager') }}" class="text-green-400 hover:text-green-300 transition flex items-center">
+                Перейти <i class="ri-arrow-right-line ml-2"></i>
+            </a>
+        </div>
+    </div>
+    <div class="bg-gray-800 rounded-xl p-6 shadow-glow">
+        <h2 class="text-xl font-bold text-white mb-4">Последние действия</h2>
+        <div id="recent-activities">
+            {% if recent_activities %}
+                {% for activity in recent_activities %}
+                <div class="border-b border-gray-700 py-3 last:border-0">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-gray-300">{{ activity.details }}</span>
+                        </div>
+                        <span class="text-gray-400 text-sm">{{ activity.created_at.strftime('%d.%m.%Y %H:%M:%S') }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-gray-400 text-center py-4">
+                    Пока нет действий
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateRecentActivities() {
+        console.log('Updating recent activities...');
+        fetch('/api/recent_activities')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received data:', data);
+                const activitiesContainer = document.getElementById('recent-activities');
+                if (data.activities && data.activities.length > 0) {
+                    console.log('Rendering activities:', data.activities);
+                    activitiesContainer.innerHTML = data.activities.map(activity => `
+                        <div class="border-b border-gray-700 py-3 last:border-0">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-gray-300">${activity.details}</span>
+                                </div>
+                                <span class="text-gray-400 text-sm">${activity.created_at}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    console.log('No activities found');
+                    activitiesContainer.innerHTML = `
+                        <div class="text-gray-400 text-center py-4">
+                            Пока нет действий
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching recent activities:', error);
+                const activitiesContainer = document.getElementById('recent-activities');
+                activitiesContainer.innerHTML = `
+                    <div class="text-red-400 text-center py-4">
+                        Ошибка при загрузке действий
+                    </div>
+                `;
+            });
+    }
+
+    // Обновляем данные каждые 30 секунд
+    setInterval(updateRecentActivities, 30000);
+
+    // Обновляем данные при возврате на вкладку
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            console.log('Tab became visible, updating activities...');
+            updateRecentActivities();
+        }
+    });
+
+    // Обновляем данные при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Page loaded, updating activities...');
+        updateRecentActivities();
+    });
+</script>
+{% endblock %}

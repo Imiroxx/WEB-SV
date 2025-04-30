@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Настройки - ShadowVault{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4">
+    <h1 class="text-3xl font-bold text-white mb-8">Настройки <span class="gradient-text">аккаунта</span></h1>
+    <div class="bg-gray-800 rounded-xl p-6 shadow-glow mb-8">
+        <h2 class="text-xl font-bold text-white mb-6">Основная информация</h2>
+        <div class="mb-6">
+            <label class="block text-gray-300 mb-2">Логин</label>
+            <div class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white">{{ username }}</div>
+        </div>
+        <div class="mb-6">
+            <label class="block text-gray-300 mb-2">Статус аккаунта</label>
+            <div class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-green-400">
+                <i class="ri-checkbox-circle-line mr-2"></i> Активен
+            </div>
+        </div>
+    </div>
+    <div class="bg-gray-800 rounded-xl p-6 shadow-glow mb-8">
+        <h2 class="text-xl font-bold text-white mb-6">Смена пароля</h2>
+        <form id="change-password-form">
+            <div class="mb-4">
+                <label for="current-password" class="block text-gray-300 mb-2">Текущий пароль</label>
+                <input type="password" id="current-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" required>
+            </div>
+            <div class="mb-4">
+                <label for="new-password" class="block text-gray-300 mb-2">Новый пароль</label>
+                <input type="password" id="new-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" required>
+                <p class="text-gray-400 text-sm mt-1">Минимум 7 символов</p>
+            </div>
+            <div class="mb-6">
+                <label for="repeat-password" class="block text-gray-300 mb-2">Повторите новый пароль</label>
+                <input type="password" id="repeat-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none" required>
+            </div>
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition transform hover:scale-105">
+                Изменить пароль
+            </button>
+        </form>
+    </div>
+    <div class="bg-gray-800 rounded-xl p-6 shadow-glow">
+        <h2 class="text-xl font-bold text-white mb-4">О программе</h2>
+        <div class="mb-6">
+            <label class="block text-gray-300 mb-2">Версия</label>
+            <div class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white">ShadowVault v2.3.3</div>
+        </div>
+        <div class="mb-6">
+            <label class="block text-gray-300 mb-2">Техническая поддержка</label>
+            <div class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                <i class="ri-mail-line mr-2"></i> tehsup-sv@yandex.ru
+            </div>
+        </div>
+        <div class="flex justify-center">
+            <a href="{{ url_for('logout') }}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover:scale-105 text-center">
+                <i class="ri-logout-box-r-line mr-2"></i> Выйти
+            </a>
+        </div>
+    </div>
+</div>
+{% block extra_css %}
+<style>
+    @media (max-width: 640px) {
+        .max-w-2xl {
+            max-width: 100%;
+            padding: 0.5rem;
+        }
+        .text-3xl {
+            font-size: 1.5rem;
+        }
+        .text-xl {
+            font-size: 1.125rem;
+        }
+        .p-6 {
+            padding: 1rem;
+        }
+        .mb-8 {
+            margin-bottom: 1.25rem;
+        }
+        .max-w-2xl {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const changePasswordForm = document.getElementById('change-password-form');
+    changePasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const repeatPassword = document.getElementById('repeat-password').value;
+        if (newPassword !== repeatPassword) {
+            alert('Новые пароли не совпадают');
+            return;
+        }
+        if (newPassword.length < 7) {
+            alert('Пароль должен содержать не менее 7 символов');
+            return;
+        }
+        try {
+            const response = await fetch('/api/change_password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword,
+                    repeat_password: repeatPassword
+                })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.success);
+                changePasswordForm.reset();
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            alert('Ошибка при изменении пароля');
+            console.error(error);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

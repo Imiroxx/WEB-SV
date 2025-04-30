@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}Облако - ShadowVault{% endblock %}
+{% block extra_css %}
+<style>
+    .tab-button {
+        transition: all 0.3s ease;
+    }
+    .tab-button.active {
+        background-color: #4B5563;
+        color: white;
+    }
+    @media (max-width: 640px) {
+        .container {
+            padding: 0.5rem;
+        }
+        .grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        .p-6 {
+            padding: 1rem;
+        }
+        .py-8 {
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+        .mb-6 {
+            margin-bottom: 1rem;
+        }
+        .text-2xl {
+            font-size: 1.25rem;
+        }
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        .hover-lift:hover {
+            transform: none;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .space-x-2 > * {
+            margin-right: 0 !important;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4">
+    <h1 class="text-3xl font-bold text-white mb-6">Облачное хранилище</h1>
+    <!-- Остальное содержимое без изменений -->
+        <div class="mb-6">
+            <p class="text-gray-400">В облаке хранятся только зашифрованные файлы. Для загрузки файла в облако используйте функцию шифрования.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="files-grid">
+        </div>
+        <div id="no-files" class="text-center py-8 hidden">
+            <p class="text-gray-400">В облаке пока нет файлов</p>
+        </div>
+        <div id="loading" class="text-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
+        </div>
+    </div>
+</div>
+<script>
+let refreshInterval;
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString('ru-RU', {
+        timeZone: 'Europe/Moscow',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+function createFileCard(file) {
+    const card = document.createElement('div');
+    card.className = 'bg-gray-700 rounded-lg p-4 hover-lift transition-all duration-200';
+    const name = file.name.replace('.enc', '');
+    const size = formatFileSize(file.size);
+    const date = formatDate(file.created);
+    card.innerHTML = `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2">
+            <h3 class="text-white font-medium truncate">${name}</h3>
+            <span class="text-gray-400 text-sm">${size}</span>
+        </div>
+        <div class="text-gray-400 text-sm mb-4">${date}</div>
+        <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+            <button onclick="downloadFile('${file.path}')"
+                    class="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 transition-colors">
+                Скачать
+            </button>
+            <button onclick="deleteFile('${file.path}')"
+                    class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition-colors">
+                Удалить
+            </button>
+        </div>
+    `;
+
+    return card;
+}
+async function loadFiles() {
+    try {
+        const response = await fetch('/api/get_cloud_files');
+        const data = await response.json();
+        const filesGrid = document.getElementById('files-grid');
+        const noFiles = document.getElementById('no-files');
+        const loading = document.getElementById('loading');
+        filesGrid.innerHTML = '';
+        loading.classList.add('hidden');
+        if (data.files && data.files.length > 0) {
+            noFiles.classList.add('hidden');
+            data.files.forEach(file => {
+                filesGrid.appendChild(createFileCard(file));
+            });
+        } else {
+            noFiles.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки файлов:', error);
+        showError('Ошибка загрузки файлов');
+    }
+}
+async function downloadFile(path) {
+    try {
+        const response = await fetch('/api/download_file', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ path })
+        });
+        const data = await response.json();
+        if (data.success) {
+            const link = document.createElement('a');
+            link.href = data.download_url;
+            link.download = data.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showSuccess(data.success);
+        } else {
+            showError(data.error);
+        }
+    } catch (error) {
+        console.error('Ошибка скачивания файла:', error);
+        showError('Ошибка скачивания файла');
+    }
+}
+async function deleteFile(path) {
+    if (!confirm('Вы уверены, что хотите удалить этот файл?')) {
+        return;
+    }
+    try {
+        const response = await fetch('/api/delete_file', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ path })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            showSuccess(data.success);
+            loadFiles();
+        } else {
+            showError(data.error);
+        }
+    } catch (error) {
+        console.error('Ошибка удаления файла:', error);
+        showError('Ошибка удаления файла');
+    }
+}
+function showSuccess(message) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+function showError(message) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    loadFiles();
+    refreshInterval = setInterval(loadFiles, 30000);
+});
+document.addEventListener('beforeunload', () => {
+    clearInterval(refreshInterval);
+});
+</script>
+{% endblock %}
