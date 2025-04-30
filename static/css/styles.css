@@ -1,0 +1,46 @@
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Кастомный скроллбар */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6b46c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #805ad5;
+}
+
+/* Эффекты для кнопок */
+.btn-transform {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-transform:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивные таблицы */
+.responsive-table {
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+}
